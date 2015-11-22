@@ -1,24 +1,30 @@
 #!/bin/bash
 # Modify /etc/mysql/my.cnf
+echo 'Configuring MySql...'
 private_ip=`ifconfig | head | awk '/inet addr/{print substr($2,6)}'`
 perl -i -pe "s/127.0.0.1/$private_ip/g" /etc/mysql/my.cnf
-/etc/init.d/mysql restart
+/etc/init.d/mysql restart > /dev/null
+echo "Creating Test Database..."
 mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS test; CREATE DATABASE test; GRANT ALL ON test.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$'; USE test; CREATE TABLE users(id INTEGER, name TEXT, password TEXT, PRIMARY KEY (id)); INSERT INTO users VALUES (1 ,'Dongqiao Ma', '100'); INSERT INTO users VALUES (2 ,'Yanying Li', '200'); INSERT INTO users VALUES (3 ,'Talor Swift', '300'); SELECT * FROM users;"
 # Install GMP
-wget https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2
-tar jxf gmp-6.1.0.tar.bz2
+echo 'Installing GMP...This may take a while.'
+wget -q  https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2
+tar jxf gmp-6.1.0.tar.bz2 > /dev/null
 cd gmp-6.1.0
-apt-get -y install m4
-./configure
-apt-get -y install make
-make
-make install
+apt-get -y install m4 > /dev/null
+./configure > /dev/null
+apt-get -y install make > /dev/null
+make &> /dev/null
+make install &> /dev/null
 cd ..
 rm gmp-6.1.0.tar.bz2
 # Git Clone
-apt-get -y install git
-git clone https://github.com/Geurney/cs174project.git
+echo 'Cloning git repo...'
+apt-get -qq -y install git
+git clone -q https://github.com/Geurney/cs174project.git
 cd cs174project
 # Install MySql C API needed libraries
-apt-get -y install libmysqlclient-dev
-apt-get -y install zlib1g-dev
+echo 'Installing MySql C API libraries...'
+apt-get -qq -y install libmysqlclient-dev
+apt-get -qq -y install zlib1g-dev
+echo 'Done!'
