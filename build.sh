@@ -20,11 +20,11 @@ cd ..
 rm gmp-6.1.0.tar.bz2
 # Git Clone
 echo 'Cloning git repo...'
-apt-get -qq -y install git
+apt-get -y install git > /dev/null
 git clone -q https://github.com/Geurney/cs174project.git
 cd cs174project
 # Install MySql C API needed libraries
 echo 'Installing MySql C API libraries...'
-apt-get -qq -y install libmysqlclient-dev
-apt-get -qq -y install zlib1g-dev
+apt-get -y install libmysqlclient-dev > /dev/null
+apt-get -y install zlib1g-dev > /dev/null
 echo 'Done!'
