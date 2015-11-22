@@ -17,7 +17,7 @@ cd ..
 rm gmp-6.1.0.tar.bz2
 # Run Paillier Example
 apt-get -y install git
-git clone https://github.com/felrood/paillierspeedtest.git
-cd paillierspeedtest
+git clone https://github.com/Geurney/cs174project.git
+cd cs174project
 gcc main.c paillier.c -o paillier -L/lib -lgmp
 ./paillier
