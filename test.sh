@@ -15,9 +15,10 @@ make
 make install
 cd ..
 rm gmp-6.1.0.tar.bz2
-# Run Paillier Example
+# Git Clone
 apt-get -y install git
 git clone https://github.com/Geurney/cs174project.git
 cd cs174project
-gcc main.c paillier.c -o paillier -L/lib -lgmp
-./paillier
+# Install MySql C API needed libraries
+apt-get -y install libmysqlclient-dev
+apt-get -y install zlib1g-dev
