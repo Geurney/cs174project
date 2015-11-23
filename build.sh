@@ -22,6 +22,9 @@ rm gmp-6.1.0.tar.bz2
 echo 'Cloning git repo...'
 apt-get -y install git > /dev/null
 git clone -q https://github.com/Geurney/cs174project.git
+git config --global user.name "Geurney"
+git config --global user.email dongqiao.ma@gmail.com
+git config --global push.default simple
 # Install MySql C API needed libraries
 echo 'Installing MySql C API libraries...'
 apt-get -y install libmysqlclient-dev > /dev/null
