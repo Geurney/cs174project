@@ -48,7 +48,7 @@ my_bool  SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args,
    // store it as a char pointer in the pointer variable
    // Make sure that you don`t run in typecasting troubles later!!
    initid->ptr = (char*)i;
-   
+   initid->maybe_null = 1;
    // check the arguments format
    if (args->arg_count != 1)
    {

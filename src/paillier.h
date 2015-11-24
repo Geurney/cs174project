@@ -163,6 +163,8 @@ void paillier_mul( paillier_pubkey_t* pub,
 									 paillier_ciphertext_t* ct0,
 									 paillier_ciphertext_t* ct1 );
 
+char * encrypted_mul(char * encrypted_a, char * encrypted_b, int base, paillier_pubkey_t* public_key);
+
 /*
   Raise the given ciphertext to power pt and store the result in res,
   which is assumed to be already allocated. If ct is an encryption of

@@ -54,29 +54,42 @@ void handle_select(char input[]) {
      if(input[7] == '*') {
          strcpy(query, "SELECT * FROM Employees");
      } else {
-         char * pch;
-         pch = strtok(input, " ");
-         pch = strtok(NULL, " ");
-         if (pch[0] != 'S' && pch[0] != 'A') {
+         if (input[7] != 'S' && input[7] != 'A') {
              strcpy(query, "SELECT * FROM Employees WHERE id=");
-             strcat(query, pch);
+             strcat(query, &input[7]);
+             printf("%s\n", query);
+
+             mysql_query(conn, query);
+             if (mysql_error(conn)[0] != '\0') {
+                 printf("%s\n", mysql_error(conn));
+                 return;
+             }  
+             MYSQL_RES *res;
+             MYSQL_ROW row;
+             res = mysql_store_result(conn);
+             while(row = mysql_fetch_row(res))
+             {
+                printf("%s\t%s\t%lu\n", row[0], row[1], decrypt(row[2], BASE, pubkey, privkey));
+             }
+             mysql_free_result(res);
+         } else if(input[7] == 'S') {
+ 	    if (strchr(input, 'P') != NULL) {
+	        strcpy(query, "SELECT age, SUM_HE(salary) FROM Employees");
+	     } else {
+	       strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
+	     }
+	     strcat(query, &input[10]);
+	     printf("%s\n", query);     
+         } else {
+  	    if (strchr(input, 'P') != NULL) {
+	        strcpy(query, "SELECT age, AVG(salary) FROM Employees");
+	     } else {
+	       strcpy(query, "SELECT AVG(salary) FROM Employees");
+	     }
+	     strcat(query, &input[10]);
+	     printf("%s\n", query);     
          }
      }
-     printf("%s\n", query);
-
-     mysql_query(conn, query);
-     if (mysql_error(conn)[0] != '\0') {
-         printf("%s\n", mysql_error(conn));
-         return;
-     }
-     MYSQL_RES *res;
-     MYSQL_ROW row;
-     res = mysql_store_result(conn);
-     while(row = mysql_fetch_row(res))
-     {
-        printf("%s\t%s\t%lu\n", row[0], row[1], decrypt(row[2], BASE, pubkey, privkey));
-     }
-     mysql_free_result(res);
 }
 
 void handle_exit() {

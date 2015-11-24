@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <gmp.h>
 #include "paillier.h"
+#define BASE 32
 
 paillier_pubkey_t *pubkey;
 paillier_prvkey_t *privkey;
@@ -30,58 +31,31 @@ int main() {
             fclose(p);
   	}
         
-        printf("%s\n", paillier_pubkey_to_hex(pubkey));
-        printf("%s\n", paillier_prvkey_to_hex(privkey));
-/*
+        printf("Public key: %s\n", paillier_pubkey_to_hex(pubkey));
+        printf("Privte Key: %s\n", paillier_prvkey_to_hex(privkey));
+
 	int a = 20;
 	int b = 60;
-	paillier_plaintext_t *input2;
-	printf("Generating inputs: %d + %d = %d\n", a, b, a + b);
-	input2 = paillier_plaintext_from_ui(b);
+	printf("Example inputs: %d + %d = %d\n", a, b, a + b);
 
-	paillier_ciphertext_t ciphertext1;
-	paillier_ciphertext_t ciphertext2;
-	printf("Encrypting inputs:\n");
-        mpz_init(ciphertext1.c);
-	mpz_init(ciphertext2.c);
+	paillier_ciphertext_t ciphertext_a;
+	paillier_ciphertext_t ciphertext_b;
+        mpz_init(ciphertext_a.c);
+	mpz_init(ciphertext_b.c);
 
-  	encrypt(&ciphertext1, a, pubkey);
-        char * encrypted_salary = mpz_get_str(NULL, 32, ciphertext1.c);
-        printf("%s\n", mpz_get_str(NULL, 32, ciphertext1.c));
+	printf("Encrypting inputs...\n");
+  	encrypt(&ciphertext_a, a, pubkey);
+  	encrypt(&ciphertext_b, b, pubkey);
+        char * encrypted_a = mpz_get_str(NULL, BASE, ciphertext_a.c);
+        char * encrypted_b = mpz_get_str(NULL, BASE, ciphertext_b.c);
+	printf("%d is : %s\n", a, encrypted_a);
+	printf("%d is : %s\n", b, encrypted_b);
 
-        long unsigned int result =  decrypt(encrypted_salary, 32, pubkey, privkey);       
-*/
-/*	paillier_ciphertext_t cipher;
-	mpz_init(cipher.c);
-	mpz_set_str(cipher.c, encrypted_salary, 2);
+        printf("Mulitplication...\n");
+        char * encrypted_result = encrypted_mul(encrypted_a, encrypted_b, BASE, pubkey);
+        printf("%s\n", encrypted_result);
 
-	paillier_plaintext_t output;
-	mpz_init(output.m);
 	printf("Decrypting result: ");
-	paillier_dec(&output, pubkey, privkey, &cipher);
-	int result = mpz_get_ui(output.m);
-	printf("%lu\n", result);
-        
-*/
-
-
-/*
-	printf("%lu\n", mpz_get_ui(ciphertext1.c));
-	encrypt(&ciphertext2, b, pubkey);
-	printf("%lu\n", mpz_get_ui(ciphertext2.c));
-
-	paillier_ciphertext_t ciphertext3;
-	mpz_init(ciphertext3.c);
-	printf("Multiplication:\n");
-	paillier_mul(pubkey, &ciphertext3, &ciphertext1, &ciphertext2);
-	printf("%lu\n", mpz_get_ui(ciphertext3.c));
-
-	paillier_plaintext_t output;
-	mpz_init(output.m);
-	printf("Decrypting result: ");
-	paillier_dec(&output, pubkey, privkey, &ciphertext3);
-	int result = mpz_get_ui(output.m);
-	printf("%d\n", result);
-*/
+	printf("%lu\n", decrypt(encrypted_result, BASE, pubkey, privkey));
 	return 0;
 }

@@ -203,6 +203,21 @@ paillier_mul( paillier_pubkey_t* pub,
 	mpz_mod(res->c, res->c, pub->n_squared);
 }
 
+char * encrypted_mul(char * encrypted_a, char * encrypted_b, int base, paillier_pubkey_t* public_key) {    
+        paillier_ciphertext_t cipher_a;
+        mpz_init(cipher_a.c);
+        mpz_set_str(cipher_a.c, encrypted_a, base);
+
+        paillier_ciphertext_t cipher_b;
+        mpz_init(cipher_b.c);
+        mpz_set_str(cipher_b.c, encrypted_b, base);
+
+        paillier_ciphertext_t cipher_result;
+        mpz_init(cipher_result.c);
+        paillier_mul(public_key, &cipher_result, &cipher_a, &cipher_b);
+        return mpz_get_str(NULL, base, cipher_result.c);
+}
+
 void
 paillier_exp( paillier_pubkey_t* pub,
 							paillier_ciphertext_t* res,
