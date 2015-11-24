@@ -1,5 +1,7 @@
 /connector/connector
 /paillier/paillier
-/paillier/key.txt
+/paillier/genkey
+/paillier/key
 /src/main
-/src/key.txt
+/src/genkey
+/src/key
