@@ -1,12 +1,15 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include <string.h>
 #include<mysql/mysql.h>
 
-static char *host_name = "localhost";
-static char *user_name = "root";
-static char *password = "cs174$";
-static char *db_name = "test";
-static unsigned int port_num = 3306;
+#define HOST "localhost"
+#define USER "root"
+#define PASSWORD "cs174$"
+#define DB "test"
+#define PORT 3306
+
+#define INSERT_CLAUSE(id, age, salary) "INSERT INTO Employees VALUES(" #id "," #age "," #salary ")"
 static char *socket_name = NULL;
 static unsigned int flags = 0;
 
@@ -16,7 +19,7 @@ int main()
     
     conn = mysql_init(NULL);
     
-    if(!(mysql_real_connect(conn, host_name, user_name, password, db_name, port_num, socket_name, flags)))
+    if(!(mysql_real_connect(conn, HOST, USER, PASSWORD, DB, PORT, NULL, 0)))
     {
         fprintf(stderr, "Error : %s [%d]\n", mysql_error(conn), mysql_errno(conn));
         exit(1);
@@ -25,7 +28,15 @@ int main()
 
     MYSQL_RES *res;
     MYSQL_ROW row;
-    char *query = "SELECT * FROM users";
+
+    char *query = "INSERT INTO users VALUES(27, 45, 'txt')";
+    printf("%s\n", query);
+    mysql_query(conn, query);
+    if (mysql_error(conn)[0] != '\0') {
+	printf("%s\n", mysql_error(conn));
+    }
+
+    query = "SELECT * FROM users";
     printf("%s\n", query);
     mysql_query(conn, query);
     res = mysql_store_result(conn);
