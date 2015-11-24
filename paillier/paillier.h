@@ -120,16 +120,23 @@ void paillier_keygen( int modulusbits,
 											paillier_prvkey_t** prv,
 											paillier_get_rand_t get_rand );
 
+
+void generate_key(paillier_pubkey_t** public_key, paillier_prvkey_t** private_key);
+
 /*
 	Encrypt the given plaintext with the given public key using
 	randomness from get_rand for blinding. If res is not null, its
 	contents will be overwritten with the result. Otherwise, a new
 	paillier_ciphertext_t will be allocated and returned.
 */
- paillier_ciphertext_t* paillier_enc( paillier_ciphertext_t* res,
+paillier_ciphertext_t* paillier_enc( paillier_ciphertext_t* res,
 					 paillier_pubkey_t* pub,
 					 paillier_plaintext_t* pt,
 					 paillier_get_rand_t get_rand );
+
+
+void encrypt(paillier_ciphertext_t* result, unsigned int input, paillier_pubkey_t* public_key);
+
 
 /*
 	Decrypt the given ciphertext with the given key pair. If res is not
@@ -265,3 +272,6 @@ paillier_ciphertext_t* paillier_create_enc_zero();
 	up the number of bytes necessary to hold them.
 */
 #define PAILLIER_BITS_TO_BYTES(n) ((n) % 8 ? (n) / 8 + 1 : (n) / 8)
+
+#define BIT_LENGTH 128
+

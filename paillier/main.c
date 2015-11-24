@@ -1,33 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <gmp.h>
-#include <time.h>
 #include "paillier.h"
 
 int main() {
 	
 	paillier_pubkey_t *pubkey;
 	paillier_prvkey_t *privkey;
-	printf("Generating 128 bit key\n");
-	paillier_keygen(128, &pubkey, &privkey, &paillier_get_rand_devurandom);
-
+	printf("Generating %d bit key\n", BIT_LENGTH);
+	generate_key(&pubkey, &privkey);
 
 	int a = 20;
 	int b = 60;
-	paillier_plaintext_t *input1;
 	paillier_plaintext_t *input2;
 	printf("Generating inputs: %d + %d = %d\n", a, b, a + b);
-	input1 = paillier_plaintext_from_ui(a);
 	input2 = paillier_plaintext_from_ui(b);
 
 	paillier_ciphertext_t ciphertext1;
 	paillier_ciphertext_t ciphertext2;
 	printf("Encrypting inputs:\n");
-	mpz_init(ciphertext1.c);
+        mpz_init(ciphertext1.c);
 	mpz_init(ciphertext2.c);
-	paillier_enc(&ciphertext1, pubkey, input1, &paillier_get_rand_devurandom);
+
+	encrypt(&ciphertext1, a, pubkey);
 	printf("%lu\n", mpz_get_ui(ciphertext1.c));
-	paillier_enc(&ciphertext2, pubkey, input2, &paillier_get_rand_devurandom);
+	encrypt(&ciphertext2, b, pubkey);
 	printf("%lu\n", mpz_get_ui(ciphertext2.c));
 
 	paillier_ciphertext_t ciphertext3;

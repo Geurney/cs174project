@@ -113,6 +113,12 @@ paillier_keygen( int modulusbits,
   gmp_randclear(rand);
 }
 
+void generate_key(paillier_pubkey_t** public_key, paillier_prvkey_t** private_key) {
+        paillier_keygen(BIT_LENGTH, public_key, private_key, &paillier_get_rand_devurandom);
+}
+
+
+
 paillier_ciphertext_t*
 paillier_enc( paillier_ciphertext_t* res,
 							paillier_pubkey_t* pub,
@@ -152,6 +158,11 @@ paillier_enc( paillier_ciphertext_t* res,
 
 	return res;
 }
+
+void encrypt(paillier_ciphertext_t* result, unsigned int input, paillier_pubkey_t* public_key) {
+        paillier_enc(result, public_key, paillier_plaintext_from_ui(input), &paillier_get_rand_devurandom);
+}
+
 
 paillier_plaintext_t*
 paillier_dec( paillier_plaintext_t* res,
