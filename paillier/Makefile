@@ -7,5 +7,4 @@ genkey: genkey.c paillier.c
 	gcc genkey.c paillier.c -o genkey -L/lib -lgmp
 
 clean:
-	$(rm) genkey
-	$(rm) paillier
+	rm genkey paillier
