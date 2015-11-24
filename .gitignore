@@ -1,3 +1,5 @@
 /connector/connector
 /paillier/paillier
+/src/main
+/src/key.txt
 /udf/calc_distance_udf.so
