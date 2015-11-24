@@ -3,6 +3,8 @@
 echo 'Configuring MySql...'
 private_ip=`ifconfig | head | awk '/inet addr/{print substr($2,6)}'`
 perl -i -pe "s/127.0.0.1/$private_ip/g" /etc/mysql/my.cnf
+sed -i "41i max_allowed_packet = 64M" /etc/mysql/my.cnf
+sed -i "42i interactive_timeout = 3600" /etc/mysql/my.cnf
 /etc/init.d/mysql restart > /dev/null
 echo "Creating Test Database..."
 mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS test; CREATE DATABASE test; GRANT ALL ON test.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$'; USE test; CREATE TABLE users(id INTEGER, name TEXT, password TEXT, PRIMARY KEY (id)); INSERT INTO users VALUES (1 ,'Dongqiao Ma', '100'); INSERT INTO users VALUES (2 ,'Yanying Li', '200'); INSERT INTO users VALUES (3 ,'Talor Swift', '300'); SELECT * FROM users;"
