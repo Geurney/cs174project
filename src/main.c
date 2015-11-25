@@ -34,13 +34,7 @@ void handle_insert(char input[]) {
      params[2] = mpz_get_str(NULL, BASE, ciphertext.c);
 
      char query[BUFFER_SIZE];
-     strcpy(query, "INSERT INTO Employees VALUES(");
-     strcat(query, params[0]);
-     strcat(query, ",");
-     strcat(query, params[1]);
-     strcat(query, ",'");
-     strcat(query, params[2]);
-     strcat(query, "')");
+     sprintf(query, "INSERT INTO Employees VALUES(%s, %s, %s)", params[0], params[1], params[2]);
      printf("%s\n", query);
 
      mysql_query(conn, query);

@@ -34,10 +34,63 @@ static pthread_mutex_t LOCK_hostname;
    
 #include <math.h>
 
+my_bool SSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+char *SSUM(UDF_INIT *initid, UDF_ARGS *args,
+          char *result, unsigned long *length,
+          char *is_null, char *error);
+void SSUM_deinit(UDF_INIT* initid);
+
+my_bool SSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+   if (args->arg_count != 1)
+   {
+      strcpy(message, "SSUM requires one arguments");
+      return 1;
+   }
+   if (args->arg_type[0] != STRING_RESULT)
+   {
+      strcpy(message ,"SSUM requires a string");
+      return 1;
+   }       
+ //  initid->maybe_null = 1;
+   return 0;
+}
+
+char *SSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
+                char *is_null, char *error) {
+   
+ //  *is_null = 0;
+   printf("%s\n", args->args[0]);
+ //  strcpy(error, "HELLO!");
+   strcpy(result, "HELLO!");
+ //  sprintf(result, "Hello %s", args->args[0]);
+   *length = strlen(result);
+   return result; 
+}
+
+
+void SSUM_deinit(UDF_INIT* initid) {
+  free(initid->ptr);
+}
+// #include "paillier.h"
+// paillier_pubkey_t *pubkey;
+
 /*****Aggregation Sum Operation******/
-my_bool  SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, 
-                               char *message)
+my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message)
 {
+/*
+   FILE *f = fopen("key", "r");
+   if (f == NULL) {
+      strcpy(message, "Cannot open key file");
+      return 1;
+   } 
+   if (f != NULL) {
+      printf("Read key from file...\n");
+      char line[128];
+      fgets(line, sizeof(line), f);
+      pubkey = paillier_pubkey_from_hex(line);
+      fclose(f);
+   }
+*/
    // The most important thing to do here is setting up the memory
    // you need...
    // Lets say we need a lonlong type variable to keep a checksum
@@ -52,13 +105,13 @@ my_bool  SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args,
    // check the arguments format
    if (args->arg_count != 1)
    {
-      strcpy(message,"MyTest() requires one arguments");
+      strcpy(message, "SUM_HE requires one arguments");
       return 1;
    }
 
    if (args->arg_type[0] != INT_RESULT)
    {
-      strcpy(message,"MyTest() requires an integer");
+      strcpy(message ,"SUM_HE requires an integer");
       return 1;
    }       
    return 0;            
