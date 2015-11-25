@@ -61,8 +61,8 @@ char *SSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length
  //  *is_null = 0;
    printf("%s\n", args->args[0]);
  //  strcpy(error, "HELLO!");
-   strcpy(result, "HELLO!");
- //  sprintf(result, "Hello %s", args->args[0]);
+ //  strcpy(result, "HELLO! ");
+   sprintf(result, "Hello %s", args->args[0]);
    *length = strlen(result);
    return result; 
 }
