@@ -14,7 +14,7 @@ wget -q  https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2
 tar jxf gmp-6.1.0.tar.bz2 > /dev/null
 cd gmp-6.1.0
 apt-get -y install m4 > /dev/null
-./configure > /dev/null
+./configure --prefix="/usr" > /dev/null
 apt-get -y install make > /dev/null
 make &> /dev/null
 make install &> /dev/null
