@@ -37,12 +37,11 @@ static pthread_mutex_t LOCK_hostname;
 #include "paillier.h"
 
 #define PUBKEY "97675ea4835dfd14f1a000e425d0db6b"
-#define ZERO "96iqe8qb4rqjdc3jlcb6i9gupfa6knj84rcuouceo8guc6ta9nj"
 #define BASE 32
 
 struct product_type
 {
-  paillier_pubkey_t *pubkey;    
+  paillier_pubkey_t *pubkey;
   char *product;
 };
 
@@ -58,10 +57,18 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
       strcpy(message ,"Encrypted Aggregation SUM requires one string");
       return 1;
    }
-
+   FILE *f = fopen("/home/ubuntu/cs174project/src/key", "r");
+   if (f == NULL) {
+      strcpy(message ,"Cannot find key file");
+      return 1;
+   }
    struct product_type* data = (struct product_type*)malloc(sizeof(struct product_type));
-   data->pubkey = paillier_pubkey_from_hex(PUBKEY);
-   data->product = ZERO;
+   char line[128];
+   fgets(line, sizeof(line), f);
+   data->pubkey = paillier_pubkey_from_hex(line);
+   fclose(f);
+   paillier_ciphertext_t* paillier_create_enc_zero();
+   data->product = "1";
 
    initid->maybe_null = 1;
    args->maybe_null[0] = 1;
@@ -81,7 +88,7 @@ void SUM_HE_deinit(UDF_INIT* initid) {
 void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
 {
    struct product_type* data = (struct product_type*)initid->ptr;
-   data->product = ZERO;
+   data->product = "1";
 }
 
 void SUM_HE_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
@@ -95,7 +102,7 @@ char *SUM_HE(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *leng
                 char *is_null, char *error) { 
 
    struct product_type* data = (struct product_type*)initid->ptr;
-   if (data->product == ZERO) {
+   if (data->product == "1") {
       *is_null = 1;
       *length = 0;
       return NULL;
