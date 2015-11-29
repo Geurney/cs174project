@@ -5,9 +5,11 @@ private_ip=`ifconfig | head | awk '/inet addr/{print substr($2,6)}'`
 perl -i -pe "s/127.0.0.1/$private_ip/g" /etc/mysql/my.cnf
 sed -i "41i max_allowed_packet = 64M" /etc/mysql/my.cnf
 sed -i "42i interactive_timeout = 3600" /etc/mysql/my.cnf
+sed -i "$i /home/ubuntu/cs174project/udf/pubkey r," /etc/apparmor.d/usr.sbin.mysqld
+/etc/init.d/apparmor restart > /dev/null
 /etc/init.d/mysql restart > /dev/null
 echo "Creating Test Database..."
-mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS test; CREATE DATABASE test; GRANT ALL ON test.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$'; USE test; CREATE TABLE users(id INTEGER, name TEXT, password TEXT, PRIMARY KEY (id)); INSERT INTO users VALUES (1 ,'Dongqiao Ma', '100'); INSERT INTO users VALUES (2 ,'Yanying Li', '200'); INSERT INTO users VALUES (3 ,'Talor Swift', '300'); SELECT * FROM users;"
+mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS project; CREATE DATABASE project; USE project; CREATE TABLE Employees(id integer, age integer, salary TEXT NOT NULL, PRIMARY KEY (id)); GRANT ALL ON project.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$';"
 # Install GMP
 echo 'Installing GMP...This may take a while.'
 wget -q  https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2
@@ -23,7 +25,7 @@ rm gmp-6.1.0.tar.bz2
 # Git Clone
 echo 'Cloning git repo...'
 apt-get -y install git > /dev/null
-git clone -q https://github.com/Geurney/cs174project.git
+git clone -q -b release https://github.com/Geurney/cs174project.git
 git config --global user.name "Geurney"
 git config --global user.email dongqiao.ma@gmail.com
 git config --global push.default simple

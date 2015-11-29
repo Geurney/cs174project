@@ -36,8 +36,6 @@ static pthread_mutex_t LOCK_hostname;
 #include <gmp.h>
 #include "paillier.h"
 
-#define BASE 32
-
 struct product_type
 {
   paillier_pubkey_t *pubkey;
@@ -57,7 +55,7 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
       strcpy(message ,"Encrypted Aggregation SUM requires one string");
       return 1;
    }
-   FILE *f = fopen("/home/ubuntu/cs174project/udf/key", "r");
+   FILE *f = fopen("/home/ubuntu/cs174project/udf/pubkey", "r");
    if (f == NULL) {
       strcpy(message ,"Cannot find key file");
       return 1;
