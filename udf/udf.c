@@ -36,68 +36,139 @@ static pthread_mutex_t LOCK_hostname;
 #include <gmp.h>
 #include "paillier.h"
 
+#define PUBKEY "97675ea4835dfd14f1a000e425d0db6b"
+#define ZERO "96iqe8qb4rqjdc3jlcb6i9gupfa6knj84rcuouceo8guc6ta9nj"
 #define BASE 32
-my_bool SSSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+
+struct product_type
+{
+  paillier_pubkey_t *pubkey;    
+  char *product;
+};
+
+/*****************Encrypted Aggregation SUM*******************/
+my_bool ESUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    if (args->arg_count != 1)
    {
-      strcpy(message, "SSSUM requires two arguments");
-      return 1;
-   }
-   if (args->arg_type[0] != STRING_RESULT || args->arg_type[1] != STRING_RESULT)
-   {
-      strcpy(message ,"SSSUM requires two strings");
-      return 1;
-   }
- //  initid->maybe_null = 1;
-   return 0;
-}
-
-char *SSSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
-                char *is_null, char *error) { 
-   paillier_pubkey_t *pubkey;
-   char * key = "97675ea4835dfd14f1a000e425d0db6b";
-   pubkey = paillier_pubkey_from_hex(key);
-
-   char * encrypted_a = "ks1crvm9jtdjieqdq09oh9aiu1hegprii1mff238ipuc36aolv5";
-   char * encrypted_b = "6e0of3c0889ikvcmeq5ondfkfkflec9ev8nafhbrnh25iqfmb9t";
-   char * encrypted_result = encrypted_mul(encrypted_a, encrypted_b, BASE, pubkey);
-
-   sprintf(result, "%s", encrypted_result);
-   *length = strlen(result);
-   paillier_freepubkey(pubkey);
-   return result; 
-}
-
-void SSSUM_deinit(UDF_INIT* initid) {
- // free(initid->ptr);
-}
-
-/************Output String*************/
-my_bool SSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
-char *SSUM(UDF_INIT *initid, UDF_ARGS *args,
-          char *result, unsigned long *length,
-          char *is_null, char *error);
-void SSUM_deinit(UDF_INIT* initid);
-
-my_bool SSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-   if (args->arg_count != 1)
-   {
-      strcpy(message, "SSUM requires one arguments");
+      strcpy(message, "Encrypted Aggregation SUM requires one argument");
       return 1;
    }
    if (args->arg_type[0] != STRING_RESULT)
    {
-      strcpy(message ,"SSUM requires a string");
+      strcpy(message ,"Encrypted Aggregation SUM requires one string");
       return 1;
-   }       
- //  initid->maybe_null = 1;
+   }
+
+   struct product_type* data = (struct product_type*)malloc(sizeof(struct product_type));
+   data->pubkey = paillier_pubkey_from_hex(PUBKEY);
+   data->product = ZERO;
+
+   initid->ptr = (char*)data;   
    return 0;
 }
 
-char *SSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
+void ESUM_deinit(UDF_INIT* initid) {
+   struct product_type* data = (struct product_type*)initid->ptr;
+   if (data->product != NULL) {
+     free(data->product);
+     data->product = NULL;
+   }
+   paillier_freepubkey(data->pubkey);
+   free((struct product_type*)initid->ptr);
+}
+
+void ESUM_clear(UDF_INIT *initid, char *is_null, char *error)
+{
+   struct product_type* data = (struct product_type*)initid->ptr;
+   data->product = ZERO;
+}
+
+void ESUM_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
+{
+   struct product_type* data = (struct product_type*)initid->ptr;
+   if (data->product == NULL) {
+      data->product = args->args[0];    
+   }
+   else {  
+      char * product = encrypted_mul(data->product, args->args[0], BASE, data->pubkey);
+      data->product = product;
+   }
+}
+
+char *ESUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
+                char *is_null, char *error) { 
+   struct product_type* data = (struct product_type*)initid->ptr;
+   *length = strlen(data->product);
+   return data->product;
+}
+
+
+/*****************Encrypted Addition*******************/
+my_bool EADD_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+   if (args->arg_count != 2)
+   {
+      strcpy(message, "Encrypted addition requires two arguments");
+      return 1;
+   }
+   if (args->arg_type[0] != STRING_RESULT || args->arg_type[1] != STRING_RESULT)
+   {
+      strcpy(message ,"Encrypted addition requires two strings");
+      return 1;
+   }
+   struct product_type* data = (struct product_type*)malloc(sizeof(struct product_type));
+   data->pubkey = paillier_pubkey_from_hex(PUBKEY);
+   data->count = 0;
+   data->product = NULL;
+
+   initid->ptr = (char*)data;   
+   return 0;
+}
+
+void EADD_deinit(UDF_INIT* initid) {
+   struct product_type* data = (struct product_type*)initid->ptr;
+   if (data->product != NULL) {
+     free(data->product);
+     data->product = NULL;
+   }
+   paillier_freepubkey(data->pubkey);
+   free((struct product_type*)initid->ptr);
+}
+
+char *EADD(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error) { 
+   struct product_type* data = (struct product_type*)initid->ptr;
+   data->product = encrypted_mul(args->args[0], args->args[1], BASE, data->pubkey);
+   *length = strlen(data->product);
+   return data->product; 
+}
+
+
+/************String Function *************/
+my_bool SF_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+char *SF(UDF_INIT *initid, UDF_ARGS *args,
+          char *result, unsigned long *length,
+          char *is_null, char *error);
+void SF_deinit(UDF_INIT* initid);
+
+my_bool SF_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+   if (args->arg_count != 1)
+   {
+      strcpy(message, "String Function requires one arguments");
+      return 1;
+   }
+   if (args->arg_type[0] != STRING_RESULT)
+   {
+      strcpy(message ,"String Function requires a string");
+      return 1;
+   }       
+   return 0;
+}
+
+void SSUM_deinit(UDF_INIT* initid) {
+  free(initid->ptr);
+}
+
+char *SF(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
                 char *is_null, char *error) {
-   
- //  *is_null = 0;
  //  printf("%s\n", args->args[0]);
  //  strcpy(error, "HELLO!");
  //  strcpy(result, "HELLO! ");
@@ -107,29 +178,12 @@ char *SSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length
 }
 
 
-void SSUM_deinit(UDF_INIT* initid) {
-  free(initid->ptr);
-}
-// #include "paillier.h"
-// paillier_pubkey_t *pubkey;
+
+
 
 /*****Aggregation Sum Operation******/
-my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message)
+my_bool sum_int_init(UDF_INIT *initid, UDF_ARGS *args, char *message)
 {
-/*
-   FILE *f = fopen("key", "r");
-   if (f == NULL) {
-      strcpy(message, "Cannot open key file");
-      return 1;
-   } 
-   if (f != NULL) {
-      printf("Read key from file...\n");
-      char line[128];
-      fgets(line, sizeof(line), f);
-      pubkey = paillier_pubkey_from_hex(line);
-      fclose(f);
-   }
-*/
    // The most important thing to do here is setting up the memory
    // you need...
    // Lets say we need a lonlong type variable to keep a checksum
@@ -156,14 +210,14 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message)
    return 0;            
 }
 
-void SUM_HE_deinit(UDF_INIT *initid)
+void sum_int_deinit(UDF_INIT *initid)
 {
    // Here you have to free the memory you allocated in the 
    // initialization function
    free ((longlong*)initid->ptr);
 }
 
-void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
+void sum_int_clear(UDF_INIT *initid, char *is_null, char *error)
 {
    /* The clear function resets the sum to 0 for each new group
     Of course you have to allocate a longlong variable in the init 
@@ -171,13 +225,13 @@ void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
    *((longlong*)initid->ptr) = 0;
 }
 
-void SUM_HE_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
+void sum_int_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
    // For each row the current value is added to the sum
    *((longlong*)initid->ptr) = *((longlong*)initid->ptr) + *((longlong*)args->args[0]);
 }
 
-longlong SUM_HE(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
+longlong sum_int(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
    // And in the end the sum is returned
    return *((longlong*)initid->ptr);
@@ -214,3 +268,4 @@ longlong add_int(UDF_INIT *initid __attribute__((unused)), UDF_ARGS *args,
 }
 
 #endif /* HAVE_DLOPEN */
+
