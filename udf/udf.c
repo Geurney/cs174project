@@ -63,6 +63,8 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    data->pubkey = paillier_pubkey_from_hex(PUBKEY);
    data->product = ZERO;
 
+    initid->maybe_null = 1;
+  // args->maybe_null[0] = 1;
    initid->ptr = (char*)data;   
    return 0;
 }
@@ -86,18 +88,23 @@ void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
 void SUM_HE_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
    struct product_type* data = (struct product_type*)initid->ptr;
-   if (data->product == NULL) {
-      data->product = args->args[0];    
+   if (args->args[0] == NULL) {
+      *is_null = 1;
+      return;
    }
-   else {  
-      char * product = encrypted_mul(data->product, args->args[0], BASE, data->pubkey);
-      data->product = product;
-   }
+   char * product = encrypted_mul(data->product, args->args[0], BASE, data->pubkey);
+   data->product = product;
 }
 
 char *SUM_HE(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
                 char *is_null, char *error) { 
+
    struct product_type* data = (struct product_type*)initid->ptr;
+   if (args->args[0] == NULL) {
+      *is_null = 1;
+      *length = 0;
+      return NULL;
+   }
    *length = strlen(data->product);
    return data->product;
 }
@@ -115,10 +122,15 @@ my_bool EADD_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
       strcpy(message ,"Encrypted addition requires two strings");
       return 1;
    }
+   if (args->args[0] == NULL) {
+      strcpy(message ,"Encrypted addition requires Not null strings");
+      return 1;
+   }
    struct product_type* data = (struct product_type*)malloc(sizeof(struct product_type));
    data->pubkey = paillier_pubkey_from_hex(PUBKEY);
    data->product = NULL;
-
+   
+   initid->maybe_null = 1;
    initid->ptr = (char*)data;   
    return 0;
 }
@@ -134,6 +146,10 @@ void EADD_deinit(UDF_INIT* initid) {
 }
 
 char *EADD(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error) { 
+   if (args->args[0] == NULL || args->args[1] == NULL) { 
+     *is_null = 1;
+      return NULL;
+   }
    struct product_type* data = (struct product_type*)initid->ptr;
    data->product = encrypted_mul(args->args[0], args->args[1], BASE, data->pubkey);
    *length = strlen(data->product);
@@ -226,6 +242,10 @@ void sum_int_clear(UDF_INIT *initid, char *is_null, char *error)
 
 void sum_int_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
+   if (args->args[0] == NULL) {
+      *is_null = 1;
+      return;
+   }
    // For each row the current value is added to the sum
    *((longlong*)initid->ptr) = *((longlong*)initid->ptr) + *((longlong*)args->args[0]);
 }
