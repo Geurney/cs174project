@@ -5,7 +5,7 @@ private_ip=`ifconfig | head | awk '/inet addr/{print substr($2,6)}'`
 perl -i -pe "s/127.0.0.1/$private_ip/g" /etc/mysql/my.cnf
 sed -i "41i max_allowed_packet = 64M" /etc/mysql/my.cnf
 sed -i "42i interactive_timeout = 3600" /etc/mysql/my.cnf
-sed -i "$i /home/ubuntu/cs174project/udf/pubkey r," /etc/apparmor.d/usr.sbin.mysqld
+sed -i '$i /home/ubuntu/cs174project/udf/pubkey r,' /etc/apparmor.d/usr.sbin.mysqld
 /etc/init.d/apparmor restart &> /dev/null
 /etc/init.d/mysql restart > /dev/null
 echo "Creating Test Database..."
