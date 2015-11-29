@@ -1,7 +1,7 @@
 /connector/connector
-/paillier/paillier
+/paillier/paillier 
 /paillier/genkey
-/paillier/key
+/paillier/encrypt
+/paillier/decrypt
 /src/main
 /src/genkey
-/src/key

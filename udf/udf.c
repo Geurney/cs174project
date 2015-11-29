@@ -63,8 +63,8 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    data->pubkey = paillier_pubkey_from_hex(PUBKEY);
    data->product = ZERO;
 
- //   initid->maybe_null = 1;
-  // args->maybe_null[0] = 1;
+   initid->maybe_null = 1;
+   args->maybe_null[0] = 1;
    initid->ptr = (char*)data;   
    return 0;
 }
@@ -72,7 +72,6 @@ my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
 void SUM_HE_deinit(UDF_INIT* initid) {
    struct product_type* data = (struct product_type*)initid->ptr;
    if (data->product != NULL) {
-     free(data->product);
      data->product = NULL;
    }
    paillier_freepubkey(data->pubkey);
@@ -88,28 +87,21 @@ void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
 void SUM_HE_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
    struct product_type* data = (struct product_type*)initid->ptr;
-   if (args->args[0] == NULL) {
-      *is_null = 1;
-      return;
-   }
-//   char * product = encrypted_mul(data->product, args->args[0], BASE, data->pubkey);
-  // data->product = product;
+   char * product = encrypted_mul(data->product, args->args[0], BASE, data->pubkey);
+   data->product = product;
 }
 
 char *SUM_HE(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
                 char *is_null, char *error) { 
 
    struct product_type* data = (struct product_type*)initid->ptr;
-/*
-   if (*is_null) {
+   if (data->product == ZERO) {
       *is_null = 1;
       *length = 0;
       return NULL;
    }
-*/
- //  sprintf(result, "Hello %s", data->product);
-   *length = 5;
-   return "HELLO";
+   *length = strlen(data->product);
+   return data->product;
 }
 
 

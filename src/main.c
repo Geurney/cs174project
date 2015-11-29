@@ -60,7 +60,7 @@ void print_result(MYSQL *conn) {
   mysql_free_result(result);
 }
 
-bool execute(MYSQL *conn, char* query) {
+char execute(MYSQL *conn, char* query) {
   if (mysql_query(conn, query)) {
      finish_with_error(conn);
      return 0;
@@ -87,7 +87,7 @@ void handle_insert(char input[]) {
      params[2] = mpz_get_str(NULL, BASE, ciphertext.c);
 
      char query[BUFFER_SIZE];
-     sprintf(query, "INSERT INTO Employees VALUES(%s, %s, %s)", params[0], params[1], params[2]);
+     sprintf(query, "INSERT INTO Employees VALUES(%s, %s, '%s')", params[0], params[1], params[2]);
      printf("%s\n", query);
 
      if (mysql_query(conn, query)) {
@@ -120,17 +120,56 @@ void handle_select(char input[]) {
                 execute(conn, query);
             }
          } else {
-  	    if (strchr(input, 'P') != NULL) {
-	        strcpy(query, "SELECT age, AVG(salary) FROM Employees");
+                strcpy(query, "SELECT COUNT(*) FROM Employees");
                 strcat(query, &input[10]);
   	        printf("%s\n", query);     
-                execute(conn, query);
- 	    } else {
- 	        strcpy(query, "SELECT AVG(salary) FROM Employees");
+                if (mysql_query(conn, query)) {
+                  finish_with_error(conn);
+                  return;
+                }
+                MYSQL_RES *res;		
+                MYSQL_ROW row;		
+                res = mysql_store_result(conn);		
+                int count[100] = {0};
+                int i = 0;
+                while(row = mysql_fetch_row(res))		
+                {	
+                   count[i++] = atoi(row[0]);	
+                }		
+                mysql_free_result(res);
+                int j = 0;
+                for(j = 0; j < i; j++) {
+                   printf("%d\n", count[j]);
+                }
+               
+ 	        strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
                 strcat(query, &input[10]);
   	        printf("%s\n", query);     
-            }
-         }
+
+                if (mysql_query(conn, query)) {
+                  finish_with_error(conn);
+                  return;
+                }
+                
+                res = mysql_store_result(conn);		
+                unsigned long int salary[100] = {0};
+                i = 0;
+                while(row = mysql_fetch_row(res))		
+                {	 
+                   if(row[0] != NULL) {
+                     salary[i++] = decrypt(row[0], BASE, pubkey, privkey);	
+                   }
+                }		
+                mysql_free_result(res);
+                if (i == 0) {
+                    printf("NULL\n");
+                    return;
+                }
+                for (j = 0; j < i; j++) {
+                  float avg = (float)salary[j]/count[j];
+                  printf("%d\t%lu\t%f\n", count[j], salary[j], avg); 
+                }
+         }   
      }
 }
 
