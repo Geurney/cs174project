@@ -34,20 +34,21 @@ static pthread_mutex_t LOCK_hostname;
    
 #include <math.h>
 #include <gmp.h>
+#include "paillier.h"
 
 #define BASE 32
 my_bool SSSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    if (args->arg_count != 1)
    {
-      strcpy(message, "SSUM requires two arguments");
+      strcpy(message, "SSSUM requires two arguments");
       return 1;
    }
    if (args->arg_type[0] != STRING_RESULT || args->arg_type[1] != STRING_RESULT)
    {
-      strcpy(message ,"SSUM requires two strings");
+      strcpy(message ,"SSSUM requires two strings");
       return 1;
    }
-   initid->maybe_null = 1;
+ //  initid->maybe_null = 1;
    return 0;
 }
 
@@ -56,14 +57,20 @@ char *SSSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *lengt
    mpz_t p;
    mpz_init(p);
    mpz_set_str(p, args->args[0], 16);
-   result = mpz_get_str(NULL, 16, p);
+ //  char * m = mpz_get_str(NULL, 16, p);
 
-   *is_null = 0;
+   paillier_pubkey_t *pubkey;
+   paillier_prvkey_t *privkey;
+   generate_key(128, &pubkey, &privkey);
+   char* m = paillier_pubkey_to_hex(pubkey);
+
+   sprintf(result, "Hello %s", m);
    *length = strlen(result);
    return result; 
 }
 
 void SSSUM_deinit(UDF_INIT* initid) {
+  free(initid->ptr);
 }
 
 /************Output String*************/
@@ -92,7 +99,7 @@ char *SSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length
                 char *is_null, char *error) {
    
  //  *is_null = 0;
-   printf("%s\n", args->args[0]);
+ //  printf("%s\n", args->args[0]);
  //  strcpy(error, "HELLO!");
  //  strcpy(result, "HELLO! ");
    sprintf(result, "Hello %s", args->args[0]);
