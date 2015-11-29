@@ -18,6 +18,59 @@ paillier_pubkey_t *pubkey;
 paillier_prvkey_t *privkey;
 MYSQL *conn;
 
+void finish_with_error(MYSQL *conn)
+{
+  fprintf(stderr, "%s\n", mysql_error(conn));
+  mysql_close(conn);
+  return;
+}
+
+void print_result(MYSQL *conn) {
+  MYSQL_RES *result = mysql_store_result(conn);
+
+  int num_fields = mysql_num_fields(result);
+  MYSQL_ROW row;
+  MYSQL_FIELD *field;
+  
+  while ((row = mysql_fetch_row(result))) 
+  { 
+      int i;
+      for(i = 0; i < num_fields; i++) 
+      { 
+          if (i == 0) 
+          {              
+             while(field = mysql_fetch_field(result)) 
+             {
+                printf("%s\t", field->name);
+             }
+             
+             printf("\n");           
+          }
+          if (i == num_fields - 1 && row[i]) {
+            printf("%lu\t", decrypt(row[i], BASE, pubkey, privkey));
+          }
+          else if (row[i]) {
+             printf("%s\t", row[i]);
+          } else {
+              printf("NULL\t"); 
+          }
+      } 
+  }
+  printf("\n");
+  mysql_free_result(result);
+}
+
+bool execute(MYSQL *conn, char* query) {
+  if (mysql_query(conn, query)) {
+     finish_with_error(conn);
+     return 0;
+  }
+  else {
+    print_result(conn);
+    return 1;
+  }
+}
+
 void handle_insert(char input[]) {
      char * pch;
      pch = strtok(input, " ");
@@ -37,51 +90,46 @@ void handle_insert(char input[]) {
      sprintf(query, "INSERT INTO Employees VALUES(%s, %s, %s)", params[0], params[1], params[2]);
      printf("%s\n", query);
 
-     mysql_query(conn, query);
-     if (mysql_error(conn)[0] != '\0') {
-         printf("%s\n", mysql_error(conn));
+     if (mysql_query(conn, query)) {
+        finish_with_error(conn);
      }
 }
 
 void handle_select(char input[]) {
      char query[BUFFER_SIZE];
      if(input[7] == '*') {
-         strcpy(query, "SELECT * FROM Employees");
+        strcpy(query, "SELECT * FROM Employees");
+        printf("%s\n", query);
+        execute(conn, query);
      } else {
          if (input[7] != 'S' && input[7] != 'A') {
              strcpy(query, "SELECT * FROM Employees WHERE id=");
              strcat(query, &input[7]);
              printf("%s\n", query);
-
-             mysql_query(conn, query);
-             if (mysql_error(conn)[0] != '\0') {
-                 printf("%s\n", mysql_error(conn));
-                 return;
-             }  
-             MYSQL_RES *res;
-             MYSQL_ROW row;
-             res = mysql_store_result(conn);
-             while(row = mysql_fetch_row(res))
-             {
-                printf("%s\t%s\t%lu\n", row[0], row[1], decrypt(row[2], BASE, pubkey, privkey));
-             }
-             mysql_free_result(res);
+             execute(conn, query);
          } else if(input[7] == 'S') {
  	    if (strchr(input, 'P') != NULL) {
 	        strcpy(query, "SELECT age, SUM_HE(salary) FROM Employees");
-	     } else {
-	       strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
-	     }
-	     strcat(query, &input[10]);
-	     printf("%s\n", query);     
+	        strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+                execute(conn, query);
+            } else {
+	        strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
+                strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+                execute(conn, query);
+            }
          } else {
   	    if (strchr(input, 'P') != NULL) {
 	        strcpy(query, "SELECT age, AVG(salary) FROM Employees");
-	     } else {
-	       strcpy(query, "SELECT AVG(salary) FROM Employees");
-	     }
-	     strcat(query, &input[10]);
-	     printf("%s\n", query);     
+                strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+                execute(conn, query);
+ 	    } else {
+ 	        strcpy(query, "SELECT AVG(salary) FROM Employees");
+                strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+            }
          }
      }
 }
@@ -96,27 +144,18 @@ void handle_unknown() {
 
 int main()
 {
-    FILE *f = fopen("key.txt", "r");
-    if (f != NULL) {
-      printf("Read key from file...\n");
-      char line[128];
-      fgets(line, sizeof(line), f);
-      pubkey = paillier_pubkey_from_hex(line);
-      fgets(line, sizeof(line), f);
-      privkey = paillier_prvkey_from_hex(line, pubkey);
-      fclose(f);
-    } else {
-        FILE *p = fopen("key.txt", "w");
-        if (p == NULL) {
-            printf("Please run with sudo!\n");
-            exit(1);
-        }
-        printf("Generate new key...\n");
-        generate_key(BIT_LENGTH, &pubkey, &privkey);
-        fprintf(p, "%s\n", paillier_pubkey_to_hex(pubkey));
-        fprintf(p, "%s\n", paillier_prvkey_to_hex(privkey));
-        fclose(p);
+    FILE *f = fopen("key", "r");
+    if (f == NULL) {
+      printf("Key file is missing. Please generate key...\n");
+      return 0;
     }
+    printf("Read key from file...\n");
+    char line[128];
+    fgets(line, sizeof(line), f);
+    pubkey = paillier_pubkey_from_hex(line);
+    fgets(line, sizeof(line), f);
+    privkey = paillier_prvkey_from_hex(line, pubkey);
+    fclose(f);
 
     conn = mysql_init(NULL);
     if(!(mysql_real_connect(conn, HOST, USER, PASSWORD, DB, PORT, NULL, 0)))
