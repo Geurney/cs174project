@@ -14,7 +14,8 @@ Encrypted Database Aggregation UDF
 * Configuration
 ```
   cd cs174project/udf
-  sudo bash udf.sh
+  sudo -s
+  bash udf.sh
   mysql -u root --password="cs174\$" -e "GRANT ALL ON project.* TO MaLi@'ClientIP' IDENTIFIED BY 'cs174\$';"
 ```
 
