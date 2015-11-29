@@ -47,7 +47,7 @@ struct product_type
 };
 
 /*****************Encrypted Aggregation SUM*******************/
-my_bool ESUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+my_bool SUM_HE_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    if (args->arg_count != 1)
    {
       strcpy(message, "Encrypted Aggregation SUM requires one argument");
@@ -67,7 +67,7 @@ my_bool ESUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    return 0;
 }
 
-void ESUM_deinit(UDF_INIT* initid) {
+void SUM_HE_deinit(UDF_INIT* initid) {
    struct product_type* data = (struct product_type*)initid->ptr;
    if (data->product != NULL) {
      free(data->product);
@@ -77,13 +77,13 @@ void ESUM_deinit(UDF_INIT* initid) {
    free((struct product_type*)initid->ptr);
 }
 
-void ESUM_clear(UDF_INIT *initid, char *is_null, char *error)
+void SUM_HE_clear(UDF_INIT *initid, char *is_null, char *error)
 {
    struct product_type* data = (struct product_type*)initid->ptr;
    data->product = ZERO;
 }
 
-void ESUM_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
+void SUM_HE_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
 {
    struct product_type* data = (struct product_type*)initid->ptr;
    if (data->product == NULL) {
@@ -95,7 +95,7 @@ void ESUM_add(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error)
    }
 }
 
-char *ESUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
+char *SUM_HE(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
                 char *is_null, char *error) { 
    struct product_type* data = (struct product_type*)initid->ptr;
    *length = strlen(data->product);
@@ -117,7 +117,6 @@ my_bool EADD_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
    }
    struct product_type* data = (struct product_type*)malloc(sizeof(struct product_type));
    data->pubkey = paillier_pubkey_from_hex(PUBKEY);
-   data->count = 0;
    data->product = NULL;
 
    initid->ptr = (char*)data;   
