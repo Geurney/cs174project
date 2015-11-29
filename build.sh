@@ -9,7 +9,7 @@ sed -i '$i /home/ubuntu/cs174project/udf/pubkey r,' /etc/apparmor.d/usr.sbin.mys
 /etc/init.d/apparmor restart &> /dev/null
 /etc/init.d/mysql restart > /dev/null
 echo "Creating Test Database..."
-mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS project; CREATE DATABASE project; USE project; CREATE TABLE Employees(id integer, age integer, salary TEXT NOT NULL, PRIMARY KEY (id)); GRANT ALL ON project.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$';"
+mysql -u root --password="cs174\$" -e "DROP DATABASE IF EXISTS project; CREATE DATABASE project; USE project; CREATE TABLE Employees(id integer, age integer, salary TEXT NOT NULL, PRIMARY KEY (id)); GRANT ALL ON project.* TO DQ@'ResNet-6-228.resnet.ucsb.edu' IDENTIFIED BY 'cs174\$';" &> /dev/null
 # Install GMP
 echo 'Installing GMP...This may take a while.'
 wget -q  https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2
