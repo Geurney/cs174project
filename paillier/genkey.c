@@ -34,5 +34,8 @@ int main() {
     fprintf(p, "%s\n", paillier_pubkey_to_hex(pubkey));
     fprintf(p, "%s\n", paillier_prvkey_to_hex(privkey));
     fclose(p);
+
+    paillier_freepubkey(pubkey);
+    paillier_freeprvkey(privkey);
     return 0;
 }

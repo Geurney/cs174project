@@ -54,23 +54,22 @@ my_bool SSSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
 
 char *SSSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
                 char *is_null, char *error) { 
-   mpz_t p;
-   mpz_init(p);
-   mpz_set_str(p, args->args[0], 16);
- //  char * m = mpz_get_str(NULL, 16, p);
-
    paillier_pubkey_t *pubkey;
-   paillier_prvkey_t *privkey;
-   generate_key(128, &pubkey, &privkey);
-   char* m = paillier_pubkey_to_hex(pubkey);
+   char * key = "97675ea4835dfd14f1a000e425d0db6b";
+   pubkey = paillier_pubkey_from_hex(key);
 
-   sprintf(result, "Hello %s", m);
+   char * encrypted_a = "ks1crvm9jtdjieqdq09oh9aiu1hegprii1mff238ipuc36aolv5";
+   char * encrypted_b = "6e0of3c0889ikvcmeq5ondfkfkflec9ev8nafhbrnh25iqfmb9t";
+   char * encrypted_result = encrypted_mul(encrypted_a, encrypted_b, BASE, pubkey);
+
+   sprintf(result, "%s", encrypted_result);
    *length = strlen(result);
+   paillier_freepubkey(pubkey);
    return result; 
 }
 
 void SSSUM_deinit(UDF_INIT* initid) {
-  free(initid->ptr);
+ // free(initid->ptr);
 }
 
 /************Output String*************/

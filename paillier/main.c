@@ -9,7 +9,7 @@ paillier_prvkey_t *privkey;
 
 
 int main() {
-        FILE *f = fopen("key.txt", "r");
+        FILE *f = fopen("key", "r");
         if (f != NULL) {
           printf("Read key from file...\n");
           char line[128];
@@ -19,7 +19,7 @@ int main() {
           privkey = paillier_prvkey_from_hex(line, pubkey);
           fclose(f);
         } else {
-            FILE *p = fopen("key.txt", "w");
+            FILE *p = fopen("key", "w");
             if (p == NULL) {
                 printf("Please run with sudo!\n");
                 exit(1);
@@ -57,5 +57,8 @@ int main() {
 
 	printf("Decrypting result: ");
 	printf("%lu\n", decrypt(encrypted_result, BASE, pubkey, privkey));
+
+        paillier_freepubkey(pubkey);
+        paillier_freeprvkey(privkey);
 	return 0;
 }
