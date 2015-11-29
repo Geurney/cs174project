@@ -1,4 +1,4 @@
 udf: udf.c
-	gcc -I/usr/include/mysql $(mysql_config --cflags) -shared -fPIC -o  /usr/lib/mysql/plugin/udf.so udf.c
+	gcc -I/usr/include/mysql -I/usr/include $(mysql_config --cflags) -shared -fPIC -o  /usr/lib/mysql/plugin/udf.so udf.c -lgmp
 clean:
 	rm /usr/lib/mysql/plugin/udf.so

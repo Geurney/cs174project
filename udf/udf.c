@@ -33,10 +33,11 @@ static pthread_mutex_t LOCK_hostname;
 #endif
    
 #include <math.h>
+#include <gmp.h>
 
 #define BASE 32
 my_bool SSSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
-   if (args->arg_count != 2)
+   if (args->arg_count != 1)
    {
       strcpy(message, "SSUM requires two arguments");
       return 1;
@@ -46,36 +47,23 @@ my_bool SSSUM_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
       strcpy(message ,"SSUM requires two strings");
       return 1;
    }
-   FILE *f = fopen("key", "r");
-   if (f == NULL) {
-      strcpy(message, "Cannot open key file");
-      return 1;
-   } 
-   paillier_pubkey_t *pubkey;
-   if (f != NULL) {
-      printf("Read key from file...\n");
-      char line[128];
-      fgets(line, sizeof(line), f);
-      pubkey = paillier_pubkey_from_hex(line);
-      fclose(f);
-   }  
-   initid->ptr = (char*)pubkey;
    initid->maybe_null = 1;
    return 0;
 }
 
 char *SSSUM(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length,
-                char *is_null, char *error) {
-	paillier_pubkey_t *pubkey = (pubkey*)initid->ptr;
-	result = encrypted_mul(args->args[0], args->args[1], BASE, pubkey);
-	
-    *is_null = 0;
+                char *is_null, char *error) { 
+   mpz_t p;
+   mpz_init(p);
+   mpz_set_str(p, args->args[0], 16);
+   result = mpz_get_str(NULL, 16, p);
+
+   *is_null = 0;
    *length = strlen(result);
    return result; 
 }
 
 void SSSUM_deinit(UDF_INIT* initid) {
-  free((pubkey*)initid->ptr);
 }
 
 /************Output String*************/
