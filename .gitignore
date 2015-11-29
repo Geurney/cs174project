@@ -1,7 +1,7 @@
-/connector/connector
-/paillier/paillier 
-/paillier/genkey
-/paillier/encrypt
-/paillier/decrypt
-/src/main
-/src/genkey
+/client/main
+/client/genkey
+/client/decrypt
+/client/encrypt
+/client/key
+/client/pubkey
+/udf/pubkey

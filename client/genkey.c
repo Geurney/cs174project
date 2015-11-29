@@ -4,8 +4,6 @@
 #include "paillier.h"
 #define BASE 32
 
-
-
 int main() {
     paillier_pubkey_t *pubkey;
     paillier_prvkey_t *privkey;
@@ -33,7 +31,17 @@ int main() {
     generate_key(128, &pubkey, &privkey);
     fprintf(p, "%s\n", paillier_pubkey_to_hex(pubkey));
     fprintf(p, "%s\n", paillier_prvkey_to_hex(privkey));
+    fprintf(p, "%d\n", BASE);
     fclose(p);
+    
+    FILE *q = fopen("pubkey","w");
+    if (q == NULL) {
+         printf("Please run with sudo!\n");
+         exit(1);
+    }
+    fprintf(q, "%s\n", paillier_pubkey_to_hex(pubkey));
+    fprintf(q, "%d\n", BASE);
+    fclose(q);
 
     paillier_freepubkey(pubkey);
     paillier_freeprvkey(privkey);

@@ -1,7 +1,4 @@
-all: paillier genkey encrypt decrypt
-
-paillier: main.c paillier.c
-	gcc main.c paillier.c -o paillier -lgmp
+all: genkey encrypt decrypt main
 
 genkey: genkey.c paillier.c
 	gcc genkey.c paillier.c -o genkey -lgmp
@@ -12,5 +9,8 @@ encrypt: encrypt.c paillier.c
 decrypt: decrypt.c paillier.c
 	gcc decrypt.c paillier.c -o decrypt -lgmp
 
+main: main.c paillier.c
+	gcc -I/usr/include/mysql -o main $(mysql_config --cflags) main.c $(mysql_config --libs) paillier.c -lgmp -lmysqlclient -lz
+
 clean:
-	rm genkey paillier encrypt decrypt
+	rm main genkey encrypt decrypt
