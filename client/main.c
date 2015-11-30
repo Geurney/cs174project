@@ -5,8 +5,8 @@
 #include "paillier.h"
 #include <mysql/mysql.h>
 
-#define HOST "localhost"
-#define USER "root"
+#define HOST "54.153.80.124"
+#define USER "MaLi"
 #define PASSWORD "cs174$"
 #define DB "project"
 #define PORT 3306
@@ -120,6 +120,62 @@ void handle_select(char input[]) {
                 execute(conn, query);
             }
          } else {
+ 	    if (strchr(input, 'P') != NULL) {
+                strcpy(query, "SELECT age, COUNT(*) FROM Employees");
+                strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+                if (mysql_query(conn, query)) {
+                  finish_with_error(conn);
+                  return;
+                }
+                MYSQL_RES *res;		
+                MYSQL_ROW row;		
+                res = mysql_store_result(conn);		
+                int age[100] = {0};
+                int count[100] = {0};
+                int i = 0;
+                while(row = mysql_fetch_row(res))		
+                {	
+                   age[i] = atoi(row[0]);
+                   count[i] = atoi(row[1]);	
+                   i++;
+                }		
+                mysql_free_result(res);
+                int j = 0;
+                for(j = 0; j < i; j++) {
+               //    printf("%d\n", count[j]);
+                }
+               
+ 	        strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
+                strcat(query, &input[10]);
+  	        printf("%s\n", query);     
+
+                if (mysql_query(conn, query)) {
+                  finish_with_error(conn);
+                  return;
+                }
+                
+                res = mysql_store_result(conn);		
+                unsigned long int salary[100] = {0};
+                i = 0;
+                while(row = mysql_fetch_row(res))		
+                {	 
+                   if(row[0] != NULL) {
+                     salary[i++] = decrypt(row[0], BASE, pubkey, privkey);	
+                   }
+                }		
+                mysql_free_result(res);
+                if (i == 0) {
+                    printf("NULL\n");
+                    return;
+                }
+                printf("Age\tCount\tSum\tAvg\n");
+                for (j = 0; j < i; j++) {
+                  float avg = (float)salary[j]/count[j];
+                  printf("%d\t%d\t%lu\t%f\n", age[j], count[j], salary[j], avg); 
+                }
+
+            } else {
                 strcpy(query, "SELECT COUNT(*) FROM Employees");
                 strcat(query, &input[10]);
   	        printf("%s\n", query);     
@@ -165,10 +221,12 @@ void handle_select(char input[]) {
                     printf("NULL\n");
                     return;
                 }
+                printf("Count\tSum\tAvg\n");
                 for (j = 0; j < i; j++) {
                   float avg = (float)salary[j]/count[j];
                   printf("%d\t%lu\t%f\n", count[j], salary[j], avg); 
                 }
+            }
          }   
      }
 }
