@@ -20,7 +20,7 @@ MYSQL *conn;
 
 void finish_with_error(MYSQL *conn)
 {
-  fprintf(stderr, "%s\n", mysql_error(conn));
+  fprintf(stderr, "Error: %s\n", mysql_error(conn));
   mysql_close(conn);
   return;
 }
