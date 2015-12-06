@@ -5,7 +5,6 @@
 #include "paillier.h"
 #include <mysql/mysql.h>
 
-#define HOST "54.153.1.16"
 #define USER "MaLi"
 #define PASSWORD "cs174$"
 #define DB "project"
@@ -32,8 +31,17 @@ void print_result(MYSQL *conn) {
   MYSQL_ROW row;
   MYSQL_FIELD *field;
   
-  while ((row = mysql_fetch_row(result))) 
-  { 
+  row = mysql_fetch_row(result);
+  if (!row) {
+     printf("NULL\t"); 
+  }
+  while (1) 
+  {
+      if (!row)
+      {
+         break;
+      }
+
       int i;
       for(i = 0; i < num_fields; i++) 
       { 
@@ -46,15 +54,16 @@ void print_result(MYSQL *conn) {
              
              printf("\n");           
           }
-          if (i == num_fields - 1 && row[i]) {
+          if (i == num_fields - 1 && row[i] != NULL) {
             printf("%lu\t", decrypt(row[i], BASE, pubkey, privkey));
           }
-          else if (row[i]) {
+          else if (row[i] != NULL) {
              printf("%s\t", row[i]);
           } else {
               printf("NULL\t"); 
           }
       } 
+      row = mysql_fetch_row(result);
   }
   printf("\n");
   mysql_free_result(result);
@@ -190,11 +199,7 @@ void handle_select(char input[]) {
                    count[i++] = atoi(row[0]);	
                 }		
                 mysql_free_result(res);
-                int j = 0;
-                for(j = 0; j < i; j++) {
-                   printf("%d\n", count[j]);
-                }
-               
+
  	        strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
                 strcat(query, &input[10]);
   	        printf("%s\n", query);     
@@ -219,6 +224,7 @@ void handle_select(char input[]) {
                     return;
                 }
                 printf("Count\tSum\tAvg\n");
+                int j = 0;
                 for (j = 0; j < i; j++) {
                   float avg = (float)salary[j]/count[j];
                   printf("%d\t%lu\t%f\n", count[j], salary[j], avg); 
@@ -251,9 +257,12 @@ int main()
     privkey = paillier_prvkey_from_hex(line, pubkey);
     fclose(f);
 
+    printf("Enter Server IP: ");
+    char host[20];
+    fgets(host, 20, stdin);
     printf("Connecting to MySql...\n");
     conn = mysql_init(NULL);
-    if(!(mysql_real_connect(conn, HOST, USER, PASSWORD, DB, PORT, NULL, 0)))
+    if(!(mysql_real_connect(conn, host, USER, PASSWORD, DB, PORT, NULL, 0)))
     {
         fprintf(stderr, "Error : %s [%d]\n", mysql_error(conn), mysql_errno(conn));
         exit(1);
