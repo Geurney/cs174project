@@ -44,3 +44,10 @@ Encrypted Database Aggregation UDF
 ```
   ./main
 ```
+## [Install MySql on CentOS](https://opensourcedbms.com/dbms/installing-mysql-5-6-on-cent-os-6-3-redhat-el6-fedora/)
+```
+  wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-shared-5.6.14-1.el6.x86_64.rpm
+  wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-client-5.6.14-1.el6.x86_64.rpm
+  rpm -ivh MySQL-shared-5.6.14-1.el6.x86_64.rpm
+  rpm -ivh MySQL-client-5.6.14-1.el6.x86_64.rpm
+```
