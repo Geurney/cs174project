@@ -2,6 +2,7 @@
 /client/genkey
 /client/decrypt
 /client/encrypt
+/client/mul
 /client/key
 /client/pubkey
 /udf/pubkey

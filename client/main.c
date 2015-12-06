@@ -5,7 +5,7 @@
 #include "paillier.h"
 #include <mysql/mysql.h>
 
-#define HOST "54.153.80.124"
+#define HOST "54.153.1.16"
 #define USER "MaLi"
 #define PASSWORD "cs174$"
 #define DB "project"
@@ -141,10 +141,6 @@ void handle_select(char input[]) {
                    i++;
                 }		
                 mysql_free_result(res);
-                int j = 0;
-                for(j = 0; j < i; j++) {
-               //    printf("%d\n", count[j]);
-                }
                
  	        strcpy(query, "SELECT SUM_HE(salary) FROM Employees");
                 strcat(query, &input[10]);
@@ -170,6 +166,7 @@ void handle_select(char input[]) {
                     return;
                 }
                 printf("Age\tCount\tSum\tAvg\n");
+                int j;
                 for (j = 0; j < i; j++) {
                   float avg = (float)salary[j]/count[j];
                   printf("%d\t%d\t%lu\t%f\n", age[j], count[j], salary[j], avg); 
@@ -254,13 +251,13 @@ int main()
     privkey = paillier_prvkey_from_hex(line, pubkey);
     fclose(f);
 
+    printf("Connecting to MySql...\n");
     conn = mysql_init(NULL);
     if(!(mysql_real_connect(conn, HOST, USER, PASSWORD, DB, PORT, NULL, 0)))
     {
         fprintf(stderr, "Error : %s [%d]\n", mysql_error(conn), mysql_errno(conn));
         exit(1);
     }
-    printf("Connection opened\n");
 
     char input[BUFFER_SIZE];
     while(1) {
