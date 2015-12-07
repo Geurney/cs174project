@@ -1,5 +1,5 @@
-# cs174project
-Encrypted Database Aggregation UDF
+# cs174project Encrypted Database Aggregation UDF
+Team: MaLi
 
 ## Usage
 ### MySQL Server
@@ -16,7 +16,6 @@ Encrypted Database Aggregation UDF
   cd cs174project/udf
   sudo -s
   bash udf.sh
-  mysql -u root --password="cs174\$" -e "GRANT ALL ON project.* TO MaLi@'ClientIP' IDENTIFIED BY 'cs174\$';"
 ```
 
 ### Client
@@ -32,7 +31,6 @@ Encrypted Database Aggregation UDF
 ```
   cd cs174project/client
   sudo -s
-  In main.c, change the host to Server IP, user name as MaLi.
   make
 ```
 *  Generate Key
